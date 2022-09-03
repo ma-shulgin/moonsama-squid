@@ -26,6 +26,7 @@ type Metadata @entity {
 type Token @entity {
   id: ID!
   numericId: BigInt! @index
+  ownerId: ID
   owner: Owner
   # tokenURI of contract
   tokenUri: String
@@ -35,7 +36,9 @@ type Token @entity {
   updatedAt: BigInt! @index
   createdAt: BigInt! @index
   transfers: [Transfer!]! @derivedFrom(field: "token")
+  contractId: ID!
   contract: Contract!
+  metadataId: ID
   metadata: Metadata
 }
 

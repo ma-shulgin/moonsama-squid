@@ -1,6 +1,6 @@
 import { Store, EntityClass } from '@subsquid/typeorm-store'
 import { assert } from 'console'
-import { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { FindOptionsRelations, FindOptionsWhere, In, Not } from 'typeorm'
 
 import {
   Contract,
@@ -78,14 +78,9 @@ class TokensCache extends EntitiesCache<Token> {
     db: Store,
     contractAddress: string
   ): Promise<Array<Token>> {
-    const cachedTokens: Token[] = []
-    this.cache.forEach((token, tokenId) => {
-      if (tokenId.startsWith(contractAddress)) {
-        cachedTokens.push(token)
-      }
-    })
     const allTokens = await db.find(Token, {
       where: {
+        id: Not(In([...this.cache.keys()])),
         contract: {
           id: contractAddress,
         },
@@ -93,19 +88,11 @@ class TokensCache extends EntitiesCache<Token> {
     })
 
     // Replace db tokens that exists in cache
-    cachedTokens.forEach((token) => {
-      const replaceId = allTokens.findIndex((dbToken) => dbToken.id === token.id)
-      // Tokens only that exist in db could be cached
-      assert(replaceId >= 0)
-      allTokens[replaceId] = token
+    allTokens.forEach((token) => {
+      this.cache.set(token.id, token)
     })
 
-    // Add everything from db to in-memory cache
-    allTokens.forEach((token)=>{
-      this.addCache(token)
-    })
-    
-    return allTokens
+    return [...this.cache.values()]
   }
 }
 
