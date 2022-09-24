@@ -18,6 +18,9 @@ export class Token {
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   numericId!: bigint
 
+  @Column_("text", {nullable: true})
+  ownerId!: string | undefined | null
+
   @Index_()
   @ManyToOne_(() => Owner, {nullable: true})
   owner!: Owner | undefined | null
@@ -39,9 +42,15 @@ export class Token {
   @OneToMany_(() => Transfer, e => e.token)
   transfers!: Transfer[]
 
+  @Column_("text", {nullable: false})
+  contractId!: string
+
   @Index_()
   @ManyToOne_(() => Contract, {nullable: true})
   contract!: Contract
+
+  @Column_("text", {nullable: true})
+  metadataId!: string | undefined | null
 
   @Index_()
   @ManyToOne_(() => Metadata, {nullable: true})
